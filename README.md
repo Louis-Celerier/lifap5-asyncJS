@@ -2,7 +2,7 @@ LIFAP5 - projet 2019-2020 : gestionnaire de QCM
 ===============================================
 
 * URL de votre dépôt <https://forge.univ-lyon1.fr>
-* NOM Prénom numet #1
+* CELERIER Louis numet #1
 * NOM Prénom numet #2
 * Nom de votre application (optionnel)
 
@@ -13,7 +13,7 @@ Fonctionnalités obligatoires
 
 _*_Vous devez réaliser _toutes ces fonctionnalités_ pour avoir la note maximale_*_. Cocher celles réalisées :
 
-* [ ] **Modifier l'utilisateur connecté** : il faut pour cela remplir la champ `xApiKey` de l'objet `state` déclaré dans `js/modeles.js`. Comprendre le fonctionnement permettant le mise à jour de l'état (dans `js/modeles.js`) et la modification du comportement du bouton "utilisateur" (dans `js/vues.js`). Ensuite, il faut permettre de choisir l'utilisateur avec lequel on se connecte et se délogguer le cas échéant.
+* [x] **Modifier l'utilisateur connecté** : il faut pour cela remplir la champ `xApiKey` de l'objet `state` déclaré dans `js/modeles.js`. Comprendre le fonctionnement permettant le mise à jour de l'état (dans `js/modeles.js`) et la modification du comportement du bouton "utilisateur" (dans `js/vues.js`). Ensuite, il faut permettre de choisir l'utilisateur avec lequel on se connecte et se délogguer le cas échéant.
 * [ ] **Afficher les questions et les propositions d'un quiz** : lorsque l'on clique sur un quiz, la fonction `clickQuiz` (définie dans `js/vues.js`) est appelée. Elle appelle `renderCurrentQuizz` qui va changer l'affichage du div HTML `id-all-quizzes-main`. Modifier ces fonctions de façon à afficher les questions (et leurs propositions de réponses) du quiz au lieu de "Ici les détails pour le quiz _xxyyzz_".
 * [ ] **Répondre à un quiz**: modifier l'affichage précédent de façon à pouvoir répondre au quiz, c'est-à-dire pouvoir cocher la réponse choisie à chaque question, puis cliquer sur un bouton "Répondre" qui enverra les réponses au serveur.
 * [ ] **Afficher les quiz de l'utilisateur connecté et des réponses déjà données** : reprendre la fonctionnalité d'affichage de tous les quiz et l'adapter pour afficher les quiz de l'utilisateur connecté dans l'onglet "MES QUIZ". Similairement, remplir l'onglet "MES REPONSES" pour afficher les quiz auxquels l'utilisateur connecté a répondu
@@ -45,7 +45,7 @@ Fonctionnalités optionnelles (au choix)
   - Supprimer l'onglet "MES QUIZ" et intégrer ses fonctionnalités à l' onglet "TOUS LES QUIZ" en faisant en sorte que si le quiz affiché appartient à l'utilisateur connecté, les fonctionnalités de création (et modifications le cas échéant) sont accessibles.
 
 * [ ] Catégorie **formulaire de recherche**
-  - Le formulaire de recherche en haut de la page permet de recherche en texte plein sur tous les champ de texte des quiz, des questions et des propositions. Changer le comportement de l'onglet "TOUS LES QUIZ" mette en surbrillance les éléments au 
+  - Le formulaire de recherche en haut de la page permet de recherche en texte plein sur tous les champ de texte des quiz, des questions et des propositions. Changer le comportement de l'onglet "TOUS LES QUIZ" mette en surbrillance les éléments au
 
 * [ ] Catégorie **mise à jour dynamique**
   - Gérer la mise à jour dynamique de la liste des quiz avec avec le _websocket_ fourni par le fichier [`websocket.js`](./js/websocket.js). La fonction fournie `installWebSocket(callbackOnMessage)` prend un paramètre un callback qui devra lancer le rafraichissement de votre interface lors d'une mise à jour sur le serveur.

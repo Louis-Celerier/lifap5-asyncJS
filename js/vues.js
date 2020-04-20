@@ -41,7 +41,7 @@ const htmlQuizzesList = (quizzes, curr, total) => {
   <ul class="collection">
     ${quizzesLIst.join('')}
   </ul>
-  <div class="row">      
+  <div class="row">
     <div class="col s6 left-align">${prevBtn}</div>
     <div class="col s6 right-align">${nextBtn}</div>
   </div>
@@ -121,16 +121,21 @@ function renderCurrentQuizz() {
 const renderUserBtn = () => {
   const btn = document.getElementById('id-login');
   btn.onclick = () => {
+    //c6437247-db42-407d-9d84-f36a7b0bcb4d
     if (state.user) {
       // eslint-disable-next-line no-alert
-      alert(
-        `Bonjour ${state.user.firstname} ${state.user.lastname.toUpperCase()}`
-      );
+      if(confirm(`Bonjour ${state.user.firstname} ${state.user.lastname.toUpperCase()}, souhaitez-vous vous déconnectez ?`)) {
+        state.xApiKey = "";
+        headers.set('X-API-KEY', state.xApiKey);
+        app();
+      }
     } else {
       // eslint-disable-next-line no-alert
-      alert(
-        `Pour vous authentifier, remplir le champs xApiKey de l'objet state dans js/modele.js`
-      );
+      //alert(`Pour vous authentifier, remplir le champs xApiKey de l'objet state dans js/modele.js`);
+
+      state.xApiKey = prompt("Veuillez saisir votre xApiKey :");
+      headers.set('X-API-KEY', state.xApiKey);
+      app();
     }
   };
 };
