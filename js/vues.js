@@ -113,7 +113,16 @@ function renderQuizzes() {
 
 function renderCurrentQuizz() {
   const main = document.getElementById('id-all-quizzes-main');
-  main.innerHTML = `Ici les détails pour le quizz #${state.currentQuizz}`;
+  const url = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions`;
+  fetch(url, { method: 'GET', headers: state.headers })
+  .then(filterHttpResponse)
+  .then((data) => {
+    main.innerHTML = `<h5>quizz #${state.currentQuizz} : ${state.quizzes.results[state.currentQuizz - 1]["description"]}</h5><br/><br/>`;
+    data.forEach((c) => {
+      main.innerHTML += `<p>${c.sentence}</p><hr/>`;
+      for (let i = 0; i < c.propositions_number; i++)
+        main.innerHTML += `<p>Reponse ${i+1} : ${c.propositions[i].content}<p>`;
+  });});
 }
 
 // quand on clique sur le bouton de login, il nous dit qui on est
