@@ -109,11 +109,15 @@ function renderQuizzes() {
   quizzes.forEach((q) => {
     q.onclick = clickQuiz;
   });
+
+  //Mes Réponses et Mes Quizz
+  renderMyQuizzes();
+  renderMyAnswer();
 }
 
 function renderCurrentQuizz() {
   const main = document.getElementById('id-all-quizzes-main');
-  if (state.user) {
+  if(state.user) {
     let id;
     for (id = 0; id < state.quizzes.results.length; id++)
       if(state.currentQuizz == state.quizzes.results[id].quiz_id) break;
@@ -121,7 +125,7 @@ function renderCurrentQuizz() {
     fetch(url, { method: 'GET', headers: state.headers })
     .then(filterHttpResponse)
     .then((data) => {
-      main.innerHTML = `<h4>quizz #${state.currentQuizz} : ${state.quizzes.results[id].description}</h4><br/><br/>`;
+      main.innerHTML = `<h3>Quizz #${state.currentQuizz} : ${state.quizzes.results[id].description}</h3><h5>${state.quizzes.results[id].title}</h5>`;
       if(state.quizzes.results[id].open) {
         main.innerHTML += `<form id="rep_quest" action="#!">`;
         data.map((question) => {
@@ -141,26 +145,46 @@ function renderCurrentQuizz() {
           </form>`;
         let envoi = document.getElementById('Repondre');
         envoi.onclick = () => {
-          let nb_rep_ok = 0;
+          let ok = false;
           data.map((question) => {
               const name = document.getElementsByName(question.question_id);
               name.forEach((reponse) =>{
                 if(reponse.checked) {
-                  nb_rep_ok++;
-                  const url = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions/${question.question_id}/answers/${reponse.value}`;
-                  fetch(url, { method: 'POST', headers: state.headers })
-                  .then(filterHttpResponse)
+                  const url2 = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions/${question.question_id}/answers/${reponse.value}`;
+                  fetch(url2, { method: 'POST', headers: state.headers })
+                  .then((response) => response
+                      .json()
+                      .then((data) => {
+                        if (response.status >= 400 && response.status < 600) {
+                          throw new Error(`${data.name}: ${data.message}`);
+                        }
+                        return data;
+                      }))
                   .then((data) => {
-                    console.log(`Question #${question.question_id} Reponse #${reponse.value} : Envoyer`);                  });
+                    console.log(`Question #${question.question_id} Reponse #${reponse.value} : Envoyer`);
+                    ok = true;
+                  })
+                  .catch((err) => {
+                    console.error(`Error on json: ${err}`);
+                    ok = false;
+                  });
                 }
               });
           });
-          if(nb_rep_ok == 0)
-            alert("Il y a eu une erreur, le serveur à rejeter votre envoi");
-          if(nb_rep_ok == 1)
-            alert(`Une reponse a été envoyée avec succès`);
-          if(nb_rep_ok > 1)
-            alert(`${nb_rep_ok} reponses ont été envoyée avec succès`);
+          let etat = () => new Promise((success, failure) => {
+            setTimeout(() => {
+              if(ok)
+                success();
+              else
+                failure();
+              }, 1000);
+          });
+          const message = etat();
+          message.then(() => {
+            renderMyAnswer();
+            alert(`Les reponses ont été envoyée avec succès`);
+          })
+          .catch(() => alert(`Il y a eu une erreur, le serveur à rejeter votre envoi`));
         };
       }
       else
@@ -181,7 +205,7 @@ function renderCurrentQuizz() {
     });
   }
   else
-    main.innerHTML = `<h5>Veuillez-vous connectez...</h5>`;
+    main.innerHTML = `<h5>Veuillez-vous connecter...</h5>`;
 }
 
 // quand on clique sur le bouton de login, il nous dit qui on est
@@ -206,3 +230,71 @@ const renderUserBtn = () => {
     }
   };
 };
+
+function renderMyQuizzes() {
+  console.debug(`@renderMyQuizzes()`);
+  let bloc_question = document.getElementById('id-my-quizzes');
+  let div_question = bloc_question.children[0];
+  div_question.innerHTML = "";
+  if(state.user) {
+    const url = `${state.serverUrl}/users/quizzes`;
+    fetch(url, { method: 'GET', headers: state.headers })
+    .then(filterHttpResponse)
+    .then((data) => {
+      data.map((ordre) => {
+        if(ordre.open)
+          div_question.innerHTML += `<div id=${ordre.quiz_id}><h3 class="teal-text text-lighten-2">${ordre.description}</h3><h5>${ordre.title} #${ordre.quiz_id}</h5></div>`;
+        else
+          div_question.innerHTML += `<div id=${ordre.quiz_id}><h3 class="red-text text-lighten-2">${ordre.description}</h3><h5>${ordre.title} #${ordre.quiz_id}</h5></div>`;
+        ordre.questions_ids.map((question_id) => {
+          const url2 = `${state.serverUrl}/quizzes/${ordre.quiz_id}/questions/${question_id}`;
+          fetch(url2, { method: 'GET', headers: state.headers })
+          .then(filterHttpResponse)
+          .then((data2) => {
+            let div = document.getElementById(ordre.quiz_id);
+            div.innerHTML += `<hr/><p>${data2.sentence}</p><hr/>`;
+            data2.propositions.map((contenu) => {
+              div.innerHTML += `<p><i class="material-icons">chevron_right</i>  ${contenu.content}</p>`;
+            });
+          });
+        });
+      });
+    });
+  }
+  else
+    div_question.innerHTML = "Veuillez vous connecter...";
+}
+
+function renderMyAnswer() {
+  console.debug(`@renderMyAnswer()`);
+  let bloc_reponse = document.getElementById('id-my-answers');
+  let div_reponse = bloc_reponse.children[0];
+  if(state.user) {
+    const url = `${state.serverUrl}/users/answers`;
+    fetch(url, { method: 'GET', headers: state.headers })
+    .then(filterHttpResponse)
+    .then((data) => {
+      div_reponse.innerHTML = `<h3>${data[0].description}</h3><h5>${data[0].title}</h5>`;
+      data[0].answers.map((reponse) => {
+        const url2 = `${state.serverUrl}/quizzes/${data[0].quiz_id}/questions/${reponse.question_id}/`;
+        fetch(url2, { method: 'GET', headers: state.headers })
+        .then(filterHttpResponse)
+        .then((data2) => {
+          div_reponse.innerHTML += `<hr/><p>${data2.sentence}</p><hr/>`;
+          data2.propositions.map((contenu) => {
+            if(reponse.proposition_id == contenu.proposition_id){
+              if(reponse.proposition_id == data2.correct_propositions_number)
+                div_reponse.innerHTML += `<p class="teal-text text-lighten-2"><i class="material-icons">check</i> ${contenu.content}</p>`;
+              else
+                div_reponse.innerHTML += `<p class="red-text text-lighten-2"><i class="material-icons">clear</i>  ${contenu.content}</p>`;
+            }
+            else
+              div_reponse.innerHTML += `<p><i class="material-icons">chevron_right</i>  ${contenu.content}</p>`;
+          });
+        });
+      });
+    });
+  }
+  else
+    div_reponse.innerHTML = "Veuillez vous connecter...";
+}
