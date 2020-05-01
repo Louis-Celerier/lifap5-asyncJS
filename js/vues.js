@@ -113,16 +113,75 @@ function renderQuizzes() {
 
 function renderCurrentQuizz() {
   const main = document.getElementById('id-all-quizzes-main');
-  const url = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions`;
-  fetch(url, { method: 'GET', headers: state.headers })
-  .then(filterHttpResponse)
-  .then((data) => {
-    main.innerHTML = `<h5>quizz #${state.currentQuizz} : ${state.quizzes.results[state.currentQuizz - 1]["description"]}</h5><br/><br/>`;
-    data.forEach((c) => {
-      main.innerHTML += `<p>${c.sentence}</p><hr/>`;
-      for (let i = 0; i < c.propositions_number; i++)
-        main.innerHTML += `<p>Reponse ${i+1} : ${c.propositions[i].content}<p>`;
-  });});
+  if (state.user) {
+    let id;
+    for (id = 0; id < state.quizzes.results.length; id++)
+      if(state.currentQuizz == state.quizzes.results[id].quiz_id) break;
+    const url = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions`;
+    fetch(url, { method: 'GET', headers: state.headers })
+    .then(filterHttpResponse)
+    .then((data) => {
+      main.innerHTML = `<h4>quizz #${state.currentQuizz} : ${state.quizzes.results[id].description}</h4><br/><br/>`;
+      if(state.quizzes.results[id].open) {
+        main.innerHTML += `<form id="rep_quest" action="#!">`;
+        data.map((question) => {
+          main.innerHTML += `<hr/><p>${question.sentence}</p><hr/>`;
+          question.propositions.map((proposition) =>{
+            main.innerHTML += `<p>
+              <label>
+              <input name="${question.question_id}" value="${proposition.proposition_id}" type="radio" checked/>
+              <span>${proposition.content}</span>
+              </label>
+              </p>`;
+            });
+        });
+        main.innerHTML += `<button class="btn waves-effect waves-light" type="submit" name="action" id="Repondre">Répondre
+          <i class="material-icons right">send</i>
+          </button>
+          </form>`;
+        let envoi = document.getElementById('Repondre');
+        envoi.onclick = () => {
+          let nb_rep_ok = 0;
+          data.map((question) => {
+              const name = document.getElementsByName(question.question_id);
+              name.forEach((reponse) =>{
+                if(reponse.checked) {
+                  nb_rep_ok++;
+                  const url = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions/${question.question_id}/answers/${reponse.value}`;
+                  fetch(url, { method: 'POST', headers: state.headers })
+                  .then(filterHttpResponse)
+                  .then((data) => {
+                    console.log(`Question #${question.question_id} Reponse #${reponse.value} : Envoyer`);                  });
+                }
+              });
+          });
+          if(nb_rep_ok == 0)
+            alert("Il y a eu une erreur, le serveur à rejeter votre envoi");
+          if(nb_rep_ok == 1)
+            alert(`Une reponse a été envoyée avec succès`);
+          if(nb_rep_ok > 1)
+            alert(`${nb_rep_ok} reponses ont été envoyée avec succès`);
+        };
+      }
+      else
+        data.map(c => {
+          main.innerHTML += `<hr/><p>${c.sentence}</p><hr/>`;
+          c.propositions.map((proposition) =>{
+            main.innerHTML += `<p>
+              <label>
+              <input type="radio" disabled="disabled"/>
+              <span>${proposition.content}</span>
+              </label>
+              </p>`;
+          });
+          main.innerHTML += `<a class="btn disabled">Répondre
+            <i class="material-icons right">send</i>
+            </a>`;
+        });
+    });
+  }
+  else
+    main.innerHTML = `<h5>Veuillez-vous connectez...</h5>`;
 }
 
 // quand on clique sur le bouton de login, il nous dit qui on est
@@ -130,11 +189,10 @@ function renderCurrentQuizz() {
 const renderUserBtn = () => {
   const btn = document.getElementById('id-login');
   btn.onclick = () => {
-    //c6437247-db42-407d-9d84-f36a7b0bcb4d
     if (state.user) {
       // eslint-disable-next-line no-alert
       if(confirm(`Bonjour ${state.user.firstname} ${state.user.lastname.toUpperCase()}, souhaitez-vous vous déconnectez ?`)) {
-        state.xApiKey = "";
+        state.xApiKey = undefined;
         headers.set('X-API-KEY', state.xApiKey);
         app();
       }

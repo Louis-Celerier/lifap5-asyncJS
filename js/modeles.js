@@ -8,7 +8,7 @@
 // on pourrait le stocker dans le LocalStorage par exemple
 const state = {
   // la clef de l'utilisateur
-  xApiKey: '',
+  xApiKey: 'c6437247-db42-407d-9d84-f36a7b0bcb4d',
 
   // l'URL du serveur où accéder aux données
   serverUrl: 'https://lifap5.univ-lyon1.fr',
