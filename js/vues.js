@@ -265,7 +265,8 @@ function renderMyQuizzes() {
         else
           div_question.innerHTML += `<div id=${ordre.quiz_id}>
           <h3 class="red-text text-lighten-2">${ordre.title}</h3>
-          <h5>${ordre.description} #${ordre.quiz_id}</h5>
+          <h5>${ordre.description}</h5>
+          <h6>#${ordre.quiz_id}</h6>
           </div>`;
         ordre.questions_ids.map((question_id) => {
           const url2 = `${state.serverUrl}/quizzes/${ordre.quiz_id}/questions/${question_id}`;
@@ -425,4 +426,13 @@ function ajoutQuestion(quiz_id, question_id) {
     alert(`Création de "${packet.sentence}" : Ok`);
   })
   .catch((err) => alert(`Echec de l'ajout de la question\nRaison :\n${err}`));
+  let packet2 = {
+  "title": document.getElementById(quiz_id).childNodes[1].textContent,
+  "description": document.getElementById(quiz_id).childNodes[3].textContent,
+  "open": true
+  }
+  const url2 = `${state.serverUrl}/quizzes/${quiz_id}/`
+  fetch(url2, { method: 'POST', headers: state.headers, body: JSON.stringify(packet)})
+  .then(filterHttpResponse)
+  .then();
 }
