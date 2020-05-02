@@ -435,7 +435,6 @@ function ajoutQuestion(quiz_id, question_id) {
   fetch(url, { method: 'POST', headers: state.headers, body: JSON.stringify(packet)})
   .then(filterHttpResponse2)
   .then((data) => {
-    renderMyQuizzes();
     alert(`Création de "${packet.sentence}" : Ok`);
     const url2 = `${state.serverUrl}/quizzes/${quiz_id}/`;
     fetch(url2, { method: 'PUT', headers: state.headers, body: JSON.stringify(packet2)})
