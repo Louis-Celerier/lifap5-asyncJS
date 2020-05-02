@@ -230,8 +230,8 @@ function renderMyQuizzes() {
   let div_question = bloc_question.children[0];
   if(state.user) {
     div_question.innerHTML = `<div class="col s3">
-    <h2>Nouveau Quizz</h2>
-      <div class="row">
+    <div class="row col s3" style="position:fixed">
+      <h2>Nouveau Quizz</h2>
         <div class="input-field col s12">
           <i class="material-icons prefix">title</i>
           <input id="title" type="text" class="validate">
