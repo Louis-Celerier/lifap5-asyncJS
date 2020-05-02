@@ -429,13 +429,4 @@ function ajoutQuestion(quiz_id, question_id) {
     alert(`Création de "${packet.sentence}" : Ok`);
   })
   .catch((err) => alert(`Echec de l'ajout de la question\nRaison :\n${err}`));
-  let packet2 = {
-  "title": document.getElementById(quiz_id).childNodes[1].textContent,
-  "description": document.getElementById(quiz_id).childNodes[3].textContent,
-  "open": true
-  }
-  const url2 = `${state.serverUrl}/quizzes/${quiz_id}/`
-  fetch(url2, { method: 'POST', headers: state.headers, body: JSON.stringify(packet)})
-  .then(filterHttpResponse)
-  .then();
 }
