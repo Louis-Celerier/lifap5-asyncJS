@@ -125,7 +125,7 @@ function renderCurrentQuizz() {
     fetch(url, { method: 'GET', headers: state.headers })
     .then(filterHttpResponse)
     .then((data) => {
-      main.innerHTML = `<h3>Quizz #${state.currentQuizz} : ${state.quizzes.results[id].description}</h3><h5>${state.quizzes.results[id].title}</h5>`;
+      main.innerHTML = `<h3>Quizz #${state.currentQuizz} : ${state.quizzes.results[id].title}</h3><h5>${state.quizzes.results[id].description}</h5>`;
       if(state.quizzes.results[id].open) {
         main.innerHTML += `<form id="rep_quest" action="#!">`;
         data.map((question) => {
@@ -152,14 +152,7 @@ function renderCurrentQuizz() {
                 if(reponse.checked) {
                   const url2 = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions/${question.question_id}/answers/${reponse.value}`;
                   fetch(url2, { method: 'POST', headers: state.headers })
-                  .then((response) => response
-                      .json()
-                      .then((data) => {
-                        if (response.status >= 400 && response.status < 600) {
-                          throw new Error(`${data.name}: ${data.message}`);
-                        }
-                        return data;
-                      }))
+                  .then(filterHttpResponse2)
                   .then((data) => {
                     console.log(`Question #${question.question_id} Reponse #${reponse.value} : Envoyer`);
                     ok = true;
@@ -235,17 +228,45 @@ function renderMyQuizzes() {
   console.debug(`@renderMyQuizzes()`);
   let bloc_question = document.getElementById('id-my-quizzes');
   let div_question = bloc_question.children[0];
-  div_question.innerHTML = "";
   if(state.user) {
+    div_question.innerHTML = `<h2>Nouveau Quizz</h2>
+    <div class="col s12">
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">title</i>
+          <input id="title" type="text" class="validate">
+          <label for="title">Titre</label>
+        </div>
+        <div class="input-field col s12">
+          <i class="material-icons prefix">description</i>
+          <input id="description" type="text" class="validate">
+          <label for="description">Description</label>
+        </div>
+        <div>
+          <button class="btn waves-effect waves-light" type="submit" name="action" onclick="ajoutQuizz()" id="nouveau_quizz">
+            Créer
+            <i class="material-icons right">create</i>
+            </button>
+        </div>
+      </div>
+      <br/><br/><br/><hr/><br/><br/><br/>
+    </div>
+    <h2>Quizz Existant :</h2>`;
     const url = `${state.serverUrl}/users/quizzes`;
     fetch(url, { method: 'GET', headers: state.headers })
     .then(filterHttpResponse)
     .then((data) => {
       data.map((ordre) => {
         if(ordre.open)
-          div_question.innerHTML += `<div id=${ordre.quiz_id}><h3 class="teal-text text-lighten-2">${ordre.description}</h3><h5>${ordre.title} #${ordre.quiz_id}</h5></div>`;
+          div_question.innerHTML += `<div id=${ordre.quiz_id}>
+          <h3 class="teal-text text-lighten-2">${ordre.title}</h3>
+          <h5>${ordre.description} #${ordre.quiz_id}</h5>
+          </div>`;
         else
-          div_question.innerHTML += `<div id=${ordre.quiz_id}><h3 class="red-text text-lighten-2">${ordre.description}</h3><h5>${ordre.title} #${ordre.quiz_id}</h5></div>`;
+          div_question.innerHTML += `<div id=${ordre.quiz_id}>
+          <h3 class="red-text text-lighten-2">${ordre.title}</h3>
+          <h5>${ordre.description} #${ordre.quiz_id}</h5>
+          </div>`;
         ordre.questions_ids.map((question_id) => {
           const url2 = `${state.serverUrl}/quizzes/${ordre.quiz_id}/questions/${question_id}`;
           fetch(url2, { method: 'GET', headers: state.headers })
@@ -258,6 +279,13 @@ function renderMyQuizzes() {
             });
           });
         });
+        div_question.innerHTML += `<hr/><div>
+        <button class="btn waves-effect waves-light purple lighten-2" type="button"
+        name="action" onclick="ajoutFormQuestion(${ordre.quiz_id}, ${ordre.questions_number})" id="${ordre.quiz_id}-button"">
+        Ajouter une question
+        <i class="material-icons right">add</i>
+        </button>
+        </div>`;
       });
     });
   }
@@ -274,7 +302,7 @@ function renderMyAnswer() {
     fetch(url, { method: 'GET', headers: state.headers })
     .then(filterHttpResponse)
     .then((data) => {
-      div_reponse.innerHTML = `<h3>${data[0].description}</h3><h5>${data[0].title}</h5>`;
+      div_reponse.innerHTML = `<h3>${data[0].title}</h3><h5>${data[0].description}</h5>`;
       data[0].answers.map((reponse) => {
         const url2 = `${state.serverUrl}/quizzes/${data[0].quiz_id}/questions/${reponse.question_id}/`;
         fetch(url2, { method: 'GET', headers: state.headers })
@@ -297,4 +325,104 @@ function renderMyAnswer() {
   }
   else
     div_reponse.innerHTML = "Veuillez vous connecter...";
+}
+
+function ajoutQuizz() {
+  console.debug(`@ajoutQuizz()`);
+  const packet = {
+    "title": document.getElementById('title').value,
+    "description": document.getElementById('description').value,
+  }
+  const url = `${state.serverUrl}/quizzes/`;
+  fetch(url, { method: 'POST', headers: state.headers, body: JSON.stringify(packet)})
+  .then(filterHttpResponse2)
+  .then((data) => {
+    renderMyQuizzes();
+    alert(`Création de "${packet.title}" : Ok`);
+  })
+  .catch((err) => alert(`Echec de la création de "${packet.title}"\nRaison :\n${err}`));
+}
+
+function ajoutFormQuestion(quiz_id, question_id) {
+  console.debug(`@ajoutFormQuestion(${quiz_id}, ${question_id})`);
+  let button = document.getElementById(`${quiz_id}-button`);
+  button.style.visibility = "hidden";
+  button.disabled = true;
+  let div = document.getElementById(quiz_id);
+  div.innerHTML += `<div class="col s12">
+    <div id="${quiz_id}-div-ajout-question" class="row">
+      <div class="input-field col s8">
+        <i class="material-icons prefix">question_answer</i>
+        <input disabled id="${quiz_id}-question" type="text" class="validate">
+        <label for="${quiz_id}-question">Question</label>
+      </div>
+      <div id="proposition-div" class="input-field col s2">
+          <input id="${quiz_id}-nb-proposition" type="number" value=2 min=2 max=10 class="validate">
+          <label class="active" for="${quiz_id}-nb-proposition">Nombre de proposition</label>
+          <span class="helper-text" data-error="wrong" data-success="right">Etat</span>
+      </div>
+      <div>
+        <a class="btn-floating btn-large waves-effect waves-light" name="action" onclick="ajoutProposition(${quiz_id}, ${question_id})" id="${quiz_id}-btn-proposition">
+          <i class="material-icons right">add</i>
+          </a>
+      </div>
+    </div>
+    <br/>
+  </div>`;
+}
+
+function ajoutProposition(quiz_id, question_id) {
+  console.debug(`@ajoutProposition(${quiz_id}, ${question_id})`);
+  document.getElementById(`${quiz_id}-question`).disabled = false;
+  let proposition = document.getElementById(`${quiz_id}-btn-proposition`);
+  proposition.remove();
+  let nb_proposition = document.getElementById(`${quiz_id}-nb-proposition`).value;
+  document.getElementById('proposition-div').remove();
+  let question_div = document.getElementById(`${quiz_id}-div-ajout-question`);
+  for (let i = 0; i < nb_proposition; i++) {
+    question_div.innerHTML += `<div class="input-field col s7">
+        <input name="${quiz_id}" type="text" class="validate">
+        <label class="active" for="nb-proposition">Proposition ${i+1}</label>
+    </div>
+    <div class="input-field col s5">
+      <p>
+        <label>
+          <input name="${quiz_id}-correct" id="${quiz_id*100 + i}" type="radio" checked/>
+          <span>Bonne Reponse</span>
+        </label>
+      </p>
+    </div>`;
+    }
+    question_div.innerHTML += `<div class="col s12">
+      <button class="btn waves-effect waves-light deep-purple lighten-2" type="submit" name="action" onclick="ajoutQuestion(${quiz_id}, ${question_id})" id="${quiz_id}-envoi">
+        Soumettre
+        <i class="material-icons right">send</i>
+        </button>
+    </div>`;
+}
+
+function ajoutQuestion(quiz_id, question_id) {
+  console.debug(`@ajoutQuestion(${quiz_id}, ${question_id})`);
+  let packet = {};
+  let id = 0;
+  packet.question_id = question_id;
+  packet.sentence = document.getElementById(`${quiz_id}-question`).value;
+  packet.propositions = [];
+  let propositions = document.getElementsByName(quiz_id);
+  propositions.forEach((content) => {
+    packet.propositions.push({
+      content: content.value,
+      proposition_id: id,
+      correct: document.getElementById(`${quiz_id*100 + id}`).checked
+    });
+    id++;
+  });
+  const url = `${state.serverUrl}/quizzes/${quiz_id}/questions/`;
+  fetch(url, { method: 'POST', headers: state.headers, body: JSON.stringify(packet)})
+  .then(filterHttpResponse2)
+  .then((data) => {
+    renderMyQuizzes();
+    alert(`Création de "${packet.sentence}" : Ok`);
+  })
+  .catch((err) => alert(`Echec de l'ajout de la question\nRaison :\n${err}`));
 }

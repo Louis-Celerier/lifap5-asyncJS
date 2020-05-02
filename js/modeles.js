@@ -46,6 +46,17 @@ function filterHttpResponse(response) {
     .catch((err) => console.error(`Error on json: ${err}`));
 }
 
+function filterHttpResponse2(response) {
+  return response
+    .json()
+    .then((data) => {
+      if (response.status >= 400 && response.status < 600) {
+        throw new Error(`${data.name}: ${data.message}`);
+      }
+      return data;
+    })
+}
+
 // //////////////////////////////////////////////////////////////////////////////
 // DONNEES DES UTILISATEURS
 // //////////////////////////////////////////////////////////////////////////////
