@@ -262,7 +262,8 @@ function renderMyQuizzes() {
         if(ordre.open)
           div_question.innerHTML += `<div id=${ordre.quiz_id}>
           <h3 class="teal-text text-lighten-2">${ordre.title}</h3>
-          <h5>${ordre.description} #${ordre.quiz_id}</h5>
+          <h5>${ordre.description}</h5>
+          <h6>#${ordre.quiz_id}</h6>
           </div>`;
         else
           div_question.innerHTML += `<div id=${ordre.quiz_id}>
@@ -413,6 +414,10 @@ function ajoutProposition(quiz_id, question_id) {
 function ajoutQuestion(quiz_id, question_id) {
   console.debug(`@ajoutQuestion(${quiz_id}, ${question_id})`);
   let packet = {};
+  let packet2 = {};
+  packet2.title = document.getElementById(quiz_id).childNodes[1].textContent;
+  packet2.description = document.getElementById(quiz_id).childNodes[3].textContent;
+  packet2.open = true;
   let id = 0;
   packet.question_id = question_id;
   packet.sentence = document.getElementById(`${quiz_id}-question`).value;
@@ -432,6 +437,10 @@ function ajoutQuestion(quiz_id, question_id) {
   .then((data) => {
     renderMyQuizzes();
     alert(`Création de "${packet.sentence}" : Ok`);
+    const url2 = `${state.serverUrl}/quizzes/${quiz_id}/`;
+    fetch(url2, { method: 'PUT', headers: state.headers, body: JSON.stringify(packet2)})
+    .then(filterHttpResponse)
+    .then(renderMyQuizzes);
   })
   .catch((err) => alert(`Echec de l'ajout de la question\nRaison :\n${err}`));
 }
