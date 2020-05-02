@@ -277,7 +277,7 @@ function renderMyQuizzes() {
             let indice = 0
             let div = document.getElementById(ordre.quiz_id);
             ordre.questions_ids.map((question_id) => {
-            div.innerHTML += `<hr/><p>${data2.sentence}</p><hr/>`;
+            div.innerHTML += `<hr/><p>${data2[indice].sentence}</p><hr/>`;
             data2[indice].propositions.map((contenu) => {
               if(contenu.proposition_id == data2[indice].correct_propositions_number)
                 div.innerHTML += `<p class="teal-text text-lighten-2"><i class="material-icons">done</i>  ${contenu.content}</p>`;
