@@ -229,8 +229,8 @@ function renderMyQuizzes() {
   let bloc_question = document.getElementById('id-my-quizzes');
   let div_question = bloc_question.children[0];
   if(state.user) {
-    div_question.innerHTML = `<h2>Nouveau Quizz</h2>
-    <div class="col s12">
+    div_question.innerHTML = `<div class="col s6">
+    <h2>Nouveau Quizz</h2>
       <div class="row">
         <div class="input-field col s12">
           <i class="material-icons prefix">title</i>
@@ -249,9 +249,11 @@ function renderMyQuizzes() {
             </button>
         </div>
       </div>
-      <br/><br/><br/><hr/><br/><br/><br/>
     </div>
-    <h2>Quizz Existant :</h2>`;
+    <div id="my-quizzes" class="col s6">
+      <h2>Quizz Existant :</h2>
+    </div>`;
+    div_question = document.getElementById('my-quizzes');
     const url = `${state.serverUrl}/users/quizzes`;
     fetch(url, { method: 'GET', headers: state.headers })
     .then(filterHttpResponse)
@@ -288,6 +290,7 @@ function renderMyQuizzes() {
         </button>
         </div>`;
       });
+      div_question.innerHTML += "</div>";
     });
   }
   else
@@ -350,14 +353,14 @@ function ajoutFormQuestion(quiz_id, question_id) {
   button.style.visibility = "hidden";
   button.disabled = true;
   let div = document.getElementById(quiz_id);
-  div.innerHTML += `<div class="col s12">
+  div.innerHTML += `<div>
     <div id="${quiz_id}-div-ajout-question" class="row">
       <div class="input-field col s8">
         <i class="material-icons prefix">question_answer</i>
         <input disabled id="${quiz_id}-question" type="text" class="validate">
         <label for="${quiz_id}-question">Question</label>
       </div>
-      <div id="proposition-div" class="input-field col s2">
+      <div id="proposition-div" class="input-field col s3">
           <input id="${quiz_id}-nb-proposition" type="number" value=2 min=2 max=10 class="validate">
           <label class="active" for="${quiz_id}-nb-proposition">Nombre de proposition</label>
           <span class="helper-text" data-error="wrong" data-success="right">Etat</span>
@@ -385,7 +388,7 @@ function ajoutProposition(quiz_id, question_id) {
         <input name="${quiz_id}" type="text" class="validate">
         <label class="active" for="nb-proposition">Proposition ${i+1}</label>
     </div>
-    <div class="input-field col s5">
+    <div class="input-field col s3">
       <p>
         <label>
           <input name="${quiz_id}-correct" id="${quiz_id*100 + i}" type="radio" checked/>
