@@ -229,7 +229,7 @@ function renderMyQuizzes() {
   let bloc_question = document.getElementById('id-my-quizzes');
   let div_question = bloc_question.children[0];
   if(state.user) {
-    div_question.innerHTML = `<div class="col s6">
+    div_question.innerHTML = `<div class="col s3">
     <h2>Nouveau Quizz</h2>
       <div class="row">
         <div class="input-field col s12">
@@ -250,7 +250,7 @@ function renderMyQuizzes() {
         </div>
       </div>
     </div>
-    <div id="my-quizzes" class="col s6">
+    <div id="my-quizzes" class="col s9">
       <h2>Quizz Existant :</h2>
     </div>`;
     div_question = document.getElementById('my-quizzes');
