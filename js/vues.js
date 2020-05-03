@@ -312,25 +312,28 @@ function renderMyAnswer() {
     fetch(url, { method: 'GET', headers: state.headers })
     .then(filterHttpResponse)
     .then((data) => {
-      div_reponse.innerHTML = `<h3>${data[0].title}</h3><h5>${data[0].description}</h5>`;
-      data[0].answers.map((reponse) => {
-        const url2 = `${state.serverUrl}/quizzes/${data[0].quiz_id}/questions/${reponse.question_id}/`;
-        fetch(url2, { method: 'GET', headers: state.headers })
-        .then(filterHttpResponse)
-        .then((data2) => {
-          div_reponse.innerHTML += `<hr/><p>${data2.sentence}</p><hr/>`;
-          data2.propositions.map((contenu) => {
-            if(reponse.proposition_id == contenu.proposition_id){
-              if(reponse.proposition_id == data2.correct_propositions_number)
-                div_reponse.innerHTML += `<p class="teal-text text-lighten-2"><i class="material-icons">check</i> ${contenu.content}</p>`;
+      data.map((data2) => {
+        div_reponse.innerHTML += `<div  id="${data2.quiz_id}"><h3>${data2.title}</h3><h5>${data2.description}</h5><div>`;
+        data2.answers.map((reponse) => {
+          const url2 = `${state.serverUrl}/quizzes/${data2.quiz_id}/questions/${reponse.question_id}/`;
+          fetch(url2, { method: 'GET', headers: state.headers })
+          .then(filterHttpResponse)
+          .then((data3) => {
+            div_reponse = document.getElementById(data2.quiz_id);
+            div_reponse.innerHTML += `<hr/><p>${data3.sentence}</p><hr/>`;
+            data3.propositions.map((contenu) => {
+              if(reponse.proposition_id == contenu.proposition_id){
+                if(reponse.proposition_id == data3.correct_propositions_number)
+                  div_reponse.innerHTML += `<p class="teal-text text-lighten-2"><i class="material-icons">check</i> ${contenu.content}</p>`;
+                else
+                  div_reponse.innerHTML += `<p class="red-text text-lighten-2"><i class="material-icons">clear</i>  ${contenu.content}</p>`;
+              }
               else
-                div_reponse.innerHTML += `<p class="red-text text-lighten-2"><i class="material-icons">clear</i>  ${contenu.content}</p>`;
-            }
-            else
-              div_reponse.innerHTML += `<p><i class="material-icons">chevron_right</i>  ${contenu.content}</p>`;
+                div_reponse.innerHTML += `<p><i class="material-icons">chevron_right</i>  ${contenu.content}</p>`;
+            });
           });
         });
-      });
+      })
     });
   }
   else
