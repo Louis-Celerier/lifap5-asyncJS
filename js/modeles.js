@@ -101,12 +101,3 @@ const getQuizzes = (p = 1) => {
       return renderQuizzes();
     });
 };
-
-// //////////////////////////////////////////////////////////////////////////////
-// AJOUT DE L'ETUDIANT
-// //////////////////////////////////////////////////////////////////////////////
-
-var modals = document.querySelectorAll('.modal')
-for (var i = 0; i < modals.length; i++){
-	M.Modal.init(modals[i]);
-}
