@@ -37,7 +37,7 @@ Fonctionnalités optionnelles (au choix)
   - Dans l'onglet "MES QUIZ", afficher pour chacun des quiz de l'utilisateur la listes des répondants à ce quiz ainsi que la note obtenue, en comptant le nombre de réponses correctes répondues à chacune des questions (on supposera que toutes les questions ont le même poids).
   - Dans la liste des répondant d'un quiz, colorer différement les quiz qui sont complets (le répondant a répondu à toutes les questions) et les partiels
 
-* [] Catégorie **gestion des réponses**
+* [ ] Catégorie **gestion des réponses**
   - Modifier les réponses à un quiz auquel on a déjà répondu: Lorsque l'on a déjà répondu à un quiz, modifier le formulaire de réponse de façon à ce que le contenu du formulaire soit pré-rempli avec les réponses de l'utilisateur.
   - Se passer du bouton "Répondre" dans le formulaire de réponse: à chaque fois qu'une case est cochée, mettre directement à jour le serveur avec la réponse choisie par l'utilisateur.
 
