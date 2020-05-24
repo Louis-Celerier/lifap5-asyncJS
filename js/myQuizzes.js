@@ -1,4 +1,10 @@
-function renderMyQuizzes() {
+/* renderMyQuizzes ajoutQuizz ajoutFormQuestion ajoutProposition ajoutQuestion renderAjoutBtn */
+
+// //////////////////////////////////////////////////////////////////////////////
+// GESTION DE LA CRÉATION ET MODIFICATION DE NOS QUIZZES
+// //////////////////////////////////////////////////////////////////////////////
+
+function renderMyQuizzes() {// Charge nos quizz de depuis le serveur dans state
   console.debug(`@renderMyQuizzes()`);
   if(state.user) {
     const url = `${state.serverUrl}/users/quizzes`;
@@ -10,7 +16,7 @@ function renderMyQuizzes() {
   }
 }
 
-function ajoutQuizz() {
+function ajoutQuizz() {// Envoi notre quizz au serveur
   console.debug(`@ajoutQuizz()`);
   const packet = {
     "title": document.getElementById('title').value,
@@ -31,7 +37,7 @@ function ajoutQuizz() {
   });
 }
 
-function ajoutFormQuestion(quiz_id, question_id) {
+function ajoutFormQuestion(quiz_id, question_id) {// Ajoute le formulaire HTML permettant d'ajouter des propositions
   console.debug(`@ajoutFormQuestion(${quiz_id}, ${question_id})`);
   let button = document.getElementById(`${quiz_id}-button`);
   button.style.visibility = "hidden";
@@ -59,7 +65,7 @@ function ajoutFormQuestion(quiz_id, question_id) {
   </div>`;
 }
 
-function ajoutProposition(quiz_id, question_id) {
+function ajoutProposition(quiz_id, question_id) {// Fonction de traitement du formulaire créer par ajoutFormQuestion generant l'HTML pour les nouvelles questions
   console.debug(`@ajoutProposition(${quiz_id}, ${question_id})`);
   document.getElementById(`${quiz_id}-question`).disabled = false;
   let proposition = document.getElementById(`${quiz_id}-btn-proposition`);
@@ -89,10 +95,10 @@ function ajoutProposition(quiz_id, question_id) {
     </div>`;
 }
 
-function ajoutQuestion(quiz_id, question_id) {
+function ajoutQuestion(quiz_id, question_id) {// Fonction d'envoi de nouvelles questions au serveur
   console.debug(`@ajoutQuestion(${quiz_id}, ${question_id})`);
-  let packet = {};
-  let packet2 = {};
+  let packet = {}; // Paquet de la nouvelle question
+  let packet2 = {}; // Paquet permettant que le quizz soit open
   packet2.title = document.getElementById(quiz_id).childNodes[1].textContent;
   packet2.description = document.getElementById(quiz_id).childNodes[3].textContent;
   packet2.open = true;
@@ -101,7 +107,7 @@ function ajoutQuestion(quiz_id, question_id) {
   packet.sentence = document.getElementById(`${quiz_id}-question`).value;
   packet.propositions = [];
   let propositions = document.getElementsByName(quiz_id);
-  propositions.forEach((content) => {
+  propositions.forEach((content) => {// Initialisation du paquet de la nouvelle question
     packet.propositions.push({
       content: content.value,
       proposition_id: id,
@@ -110,12 +116,12 @@ function ajoutQuestion(quiz_id, question_id) {
     id++;
   });
   const url = `${state.serverUrl}/quizzes/${quiz_id}/questions/`;
-  fetch(url, { method: 'POST', headers: state.headers, body: JSON.stringify(packet)})
+  fetch(url, { method: 'POST', headers: state.headers, body: JSON.stringify(packet)}) // Envoi de la nouvelle question
   .then(filterHttpResponse2)
   .then((data) => {
     alert(`Création de "${packet.sentence}" : Ok`);
     const url2 = `${state.serverUrl}/quizzes/${quiz_id}/`;
-    fetch(url2, { method: 'PUT', headers: state.headers, body: JSON.stringify(packet2)})
+    fetch(url2, { method: 'PUT', headers: state.headers, body: JSON.stringify(packet2)}) // Ouverture du quizz
     .then(filterHttpResponse)
     .then(() => {renderMyQuizzes(); renderCurrentQuizz();});
   })
@@ -123,7 +129,7 @@ function ajoutQuestion(quiz_id, question_id) {
 }
 
 let renderAjoutBtn = document.getElementById("ajoutQuizz");
-renderAjoutBtn.onclick = () => {
+renderAjoutBtn.onclick = () => {// Fonction du bouton d'ajout mettant un formulaire de création d'un nouveau quizz dans TOUT LES QUIZ
   document.getElementById('id-all-quizzes-main').innerHTML = `<div class="row col s6" style="position:fixed">
     <h2>Nouveau Quizz</h2>
     <div class="input-field col s12">

@@ -134,7 +134,7 @@ function renderCurrentQuizz() {
       if(state.myQuizzes.some((quiz) => quiz.quiz_id == state.currentQuizz)) {// Si le quizz appartient à l'utilisateur
         state.myQuizzes.filter((quiz) => quiz.quiz_id == state.currentQuizz)
         .map((ordre) => {
-          if(ordre.open)
+          if(ordre.open) // Si le quizz est fonctionnel
             main.innerHTML = `<div id=${ordre.quiz_id}>
             <h3 class="teal-text text-lighten-2">${ordre.title}</h3>
             <h5>${ordre.description}</h5>
@@ -147,7 +147,7 @@ function renderCurrentQuizz() {
             <h6>#${ordre.quiz_id}</h6>
             </div>`;
           const url2 = `${state.serverUrl}/quizzes/${ordre.quiz_id}/questions/`;
-          fetch(url2, { method: 'GET', headers: state.headers })
+          fetch(url2, { method: 'GET', headers: state.headers }) // Récupere les questions
           .then(filterHttpResponse)
           .then((data2) => {
               let indice = 0
@@ -248,11 +248,12 @@ const renderUserBtn = () => {
   };
 };
 
-let envoi = (question_id, proposition_id) => {
+
+let envoi = (question_id, proposition_id) => {// Fonction d'envoi de réponse au serveur
   console.debug(`@envoi(${question_id}, ${proposition_id})`);
-  let ok = false;
+  let ok = false; // booleen servant a vérifié si tout c'est bien passée
   const url = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions/${question_id}/answers/${proposition_id}`;
-  fetch(url, { method: 'POST', headers: state.headers })
+  fetch(url, { method: 'POST', headers: state.headers }) // Envoi de la reponse au serveur
   .then(filterHttpResponse2)
   .then((data) => {
     console.log(`Question #${question_id} Reponse #${proposition_id} : Envoyer`);
@@ -262,7 +263,7 @@ let envoi = (question_id, proposition_id) => {
     console.error(`Error on json: ${err}`);
     ok = false;
   });
-  let etat = () => new Promise((success, failure) => {
+  let etat = () => new Promise((success, failure) => {// Création d'une promesse permettant d'attendre la prochaine boucle
     setTimeout(() => {
       if(ok)
         success();
@@ -271,6 +272,6 @@ let envoi = (question_id, proposition_id) => {
     }, 1000);
   });
   const message = etat();
-  message.then(renderMyAnswer)
+  message.then(renderMyAnswer) // Utilisation de la promesse permettant d'attendre la fin d'execution de fetch
   .catch(() => M.toast({html: `Il y a eu une erreur, le serveur à rejeter votre envoi`}));
 }

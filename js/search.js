@@ -1,4 +1,4 @@
-/* search bar */
+/* search */
 
 // //////////////////////////////////////////////////////////////////////////////
 // Fichier contenant le code de la barre de recherche
@@ -6,11 +6,10 @@
 
 let search = document.getElementById('search');
 
-search.onchange = () => {
-  let contents = search.value;
-  console.debug(`@search : ${contents}`);
-  if(contents != "") {
-    const url = `${state.serverUrl}/search/?q=${contents}`;
+search.onchange = () => {// Fonction de recherche sur le serveur de la barre de recherche
+  console.debug(`@search : ${search.value}`);
+  if(search.value != "") {
+    const url = `${state.serverUrl}/search/?q=${search.value}`;
     fetch(url, { method: 'GET', headers: state.headers })
     .then(filterHttpResponse)
     .then(data => {

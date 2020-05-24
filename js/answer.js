@@ -1,4 +1,10 @@
-function renderMyAnswer() {
+/* renderMyAnswer */
+
+// //////////////////////////////////////////////////////////////////////////////
+// Fichier contenant le code de permettant l'acces à nos reponses
+// //////////////////////////////////////////////////////////////////////////////
+
+function renderMyAnswer() {// Fonction chargeant nos reponses aux quizzes depuis le serveur, les enregistres aussi dans state.answers modifie l'HTML 
   console.debug(`@renderMyAnswer()`);
   let bloc_reponse = document.getElementById('id-my-answers');
   let div_reponse = bloc_reponse.children[0];
