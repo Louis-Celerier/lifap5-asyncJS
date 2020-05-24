@@ -53,4 +53,8 @@ Fonctionnalités optionnelles (au choix)
 Remarques additionnelles
 ------------------------
 
- Ici, commentaires ou remarques à destination des enseignants
+Le code de base n'as pas été réellement modifié, on peut noté l'absence de MES QUIZZ pour raison de fonctionnalités additionnelles, et un 2eme filtre de reponse JSON dans le modele permettant de faire des catch dans le fetch.
+
+search.js correspond a la fonction de recherche,
+
+l'ihm est surtout dans vue.js par la modification du renderCurrentQuizz et idem pour la gestion des reponses, answers.js recupere juste les reponses sur le serveurs et myQuizzes.js lui possèdes toutes les fonctions de modification/création de quiz
