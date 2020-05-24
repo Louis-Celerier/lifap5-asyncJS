@@ -111,90 +111,114 @@ function renderQuizzes() {
   });
 
   //Mes Réponses et Mes Quizz
-  renderMyQuizzes();
-  renderMyAnswer();
+  let attente = () => new Promise((success, failure) => {
+    setTimeout(success(), 800);
+  });
+  const render = attente();
+  render.then(() => {
+    renderMyQuizzes();
+    renderMyAnswer();
+  })
 }
 
 function renderCurrentQuizz() {
   const main = document.getElementById('id-all-quizzes-main');
-  if(state.user) {
+  if(state.user) {// L'utilisateur est connecté
     let id;
-    for (id = 0; id < state.quizzes.results.length; id++)
+    for (id = 0; id < state.quizzes.results.length; id++) // On cherche la position du quizz actuel dans le tableau
       if(state.currentQuizz == state.quizzes.results[id].quiz_id) break;
     const url = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions`;
-    fetch(url, { method: 'GET', headers: state.headers })
+    fetch(url, { method: 'GET', headers: state.headers }) // Demande du quizz
     .then(filterHttpResponse)
     .then((data) => {
-      main.innerHTML = `<h3>Quizz #${state.currentQuizz} : ${state.quizzes.results[id].title}</h3><h5>${state.quizzes.results[id].description}</h5>`;
-      if(state.quizzes.results[id].open) {
-        main.innerHTML += `<form id="rep_quest" action="#!">`;
-        data.map((question) => {
-          main.innerHTML += `<hr/><p>${question.sentence}</p><hr/>`;
-          question.propositions.map((proposition) =>{
-            main.innerHTML += `<p>
-              <label>
-              <input name="${question.question_id}" value="${proposition.proposition_id}" type="radio" checked/>
-              <span>${proposition.content}</span>
-              </label>
-              </p>`;
-            });
-        });
-        main.innerHTML += `<button class="btn waves-effect waves-light" type="submit" name="action" id="Repondre">Répondre
-          <i class="material-icons right">send</i>
-          </button>
-          </form>`;
-        let envoi = document.getElementById('Repondre');
-        envoi.onclick = () => {
-          let ok = false;
-          data.map((question) => {
-              const name = document.getElementsByName(question.question_id);
-              name.forEach((reponse) =>{
-                if(reponse.checked) {
-                  const url2 = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions/${question.question_id}/answers/${reponse.value}`;
-                  fetch(url2, { method: 'POST', headers: state.headers })
-                  .then(filterHttpResponse2)
-                  .then((data) => {
-                    console.log(`Question #${question.question_id} Reponse #${reponse.value} : Envoyer`);
-                    ok = true;
-                  })
-                  .catch((err) => {
-                    console.error(`Error on json: ${err}`);
-                    ok = false;
-                  });
-                }
+      if(state.myQuizzes.some((quiz) => quiz.quiz_id == state.currentQuizz)) {// Si le quizz appartient à l'utilisateur
+        state.myQuizzes.filter((quiz) => quiz.quiz_id == state.currentQuizz)
+        .map((ordre) => {
+          if(ordre.open)
+            main.innerHTML = `<div id=${ordre.quiz_id}>
+            <h3 class="teal-text text-lighten-2">${ordre.title}</h3>
+            <h5>${ordre.description}</h5>
+            <h6>#${ordre.quiz_id}</h6>
+            </div>`;
+          else
+            main.innerHTML = `<div id=${ordre.quiz_id}>
+            <h3 class="red-text text-lighten-2">${ordre.title}</h3>
+            <h5>${ordre.description}</h5>
+            <h6>#${ordre.quiz_id}</h6>
+            </div>`;
+          const url2 = `${state.serverUrl}/quizzes/${ordre.quiz_id}/questions/`;
+          fetch(url2, { method: 'GET', headers: state.headers })
+          .then(filterHttpResponse)
+          .then((data2) => {
+              let indice = 0
+              let div = document.getElementById(ordre.quiz_id);
+              ordre.questions_ids.map((question_id) => {
+              div.innerHTML += `<hr/><p>${data2[indice].sentence}</p><hr/>`;
+              data2[indice].propositions.map((contenu) => {
+                if(contenu.proposition_id == data2[indice].correct_propositions_number)
+                  div.innerHTML += `<p class="teal-text text-lighten-2"><i class="material-icons">done</i>  ${contenu.content}</p>`;
+                else
+                  div.innerHTML += `<p><i class="material-icons">chevron_right</i>  ${contenu.content}</p>`;
               });
+              indice++;
+            });
           });
-          let etat = () => new Promise((success, failure) => {
-            setTimeout(() => {
-              if(ok)
-                success();
-              else
-                failure();
-              }, 1000);
-          });
-          const message = etat();
-          message.then(() => {
-            renderMyAnswer();
-            alert(`Les reponses ont été envoyée avec succès`);
-          })
-          .catch(() => alert(`Il y a eu une erreur, le serveur à rejeter votre envoi`));
-        };
+          main.innerHTML += `<hr/><div>
+          <button class="btn waves-effect waves-light purple lighten-2" type="button"
+          name="action" onclick="ajoutFormQuestion(${ordre.quiz_id}, ${ordre.questions_number})" id="${ordre.quiz_id}-button"">
+          Ajouter une question
+          <i class="material-icons right">add</i>
+          </button>
+          </div>`;
+        });
       }
-      else
-        data.map(c => {
-          main.innerHTML += `<hr/><p>${c.sentence}</p><hr/>`;
-          c.propositions.map((proposition) =>{
-            main.innerHTML += `<p>
+      else {
+        main.innerHTML = `<h3>Quizz #${state.currentQuizz} : ${state.quizzes.results[id].title}</h3><h5>${state.quizzes.results[id].description}</h5>`;
+        if(state.quizzes.results[id].open) {
+          main.innerHTML += `<form id="rep_quest" action="#!">`;
+          if(state.answers.some((quiz) => quiz.quiz_id == data[0].quiz_id)) {// Si l'utilisateur à deja repondu au quizz
+            let reponses = state.answers.filter((quiz) => quiz.quiz_id == data[0].quiz_id)[0].answers;
+            data.map((question) => {// On coche ce qu'il avait déjà choisie
+              let reponse = reponses.filter((rep) => rep.question_id == question.question_id);
+              main.innerHTML += `<hr/><p>${question.sentence}</p><hr/>`;
+              question.propositions.map((proposition) =>{
+                let p_id = reponse.some((p_Id) => p_Id.proposition_id == proposition.proposition_id) ? "checked" : "";
+                main.innerHTML += `<p>
+                <label>
+                <input name="${question.question_id}" value="${proposition.proposition_id}" onclick="envoi(${question.question_id}, ${proposition.proposition_id})" type="radio" ${p_id}/>
+                <span>${proposition.content}</span>
+                </label>
+                </p>`;
+              });
+            });
+          }
+          else {
+            data.map((question) => {// Affichage par défaut d'un quizz valide
+              main.innerHTML += `<hr/><p>${question.sentence}</p><hr/>`;
+              question.propositions.map((proposition) =>{
+                main.innerHTML += `<p>
+                <label>
+                <input name="${question.question_id}" value="${proposition.proposition_id}" onclick="envoi(${question.question_id}, ${proposition.proposition_id})" type="radio"/>
+                <span>${proposition.content}</span>
+                </label>
+                </p>`;
+              });
+            });
+          }
+        }
+        else
+          data.map(c => {// Affichage d'un quizz non valide
+            main.innerHTML += `<hr/><p>${c.sentence}</p><hr/>`;
+            c.propositions.map((proposition) =>{
+              main.innerHTML += `<p>
               <label>
               <input type="radio" disabled="disabled"/>
               <span>${proposition.content}</span>
               </label>
               </p>`;
+            });
           });
-          main.innerHTML += `<a class="btn disabled">Répondre
-            <i class="material-icons right">send</i>
-            </a>`;
-        });
+      }
     });
   }
   else
@@ -223,3 +247,30 @@ const renderUserBtn = () => {
     }
   };
 };
+
+let envoi = (question_id, proposition_id) => {
+  console.debug(`@envoi(${question_id}, ${proposition_id})`);
+  let ok = false;
+  const url = `${state.serverUrl}/quizzes/${state.currentQuizz}/questions/${question_id}/answers/${proposition_id}`;
+  fetch(url, { method: 'POST', headers: state.headers })
+  .then(filterHttpResponse2)
+  .then((data) => {
+    console.log(`Question #${question_id} Reponse #${proposition_id} : Envoyer`);
+    ok = true;
+  })
+  .catch((err) => {
+    console.error(`Error on json: ${err}`);
+    ok = false;
+  });
+  let etat = () => new Promise((success, failure) => {
+    setTimeout(() => {
+      if(ok)
+        success();
+      else
+        failure();
+    }, 1000);
+  });
+  const message = etat();
+  message.then(renderMyAnswer)
+  .catch(() => M.toast({html: `Il y a eu une erreur, le serveur à rejeter votre envoi`}));
+}
